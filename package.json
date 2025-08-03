@@ -1,0 +1,44 @@
+{
+  "name": "language-map-quest",
+  "version": "1.0.0",
+  "description": "A modern, interactive Spanish learning application with flashcards, quizzes, and call & response exercises",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "serve": "python -m http.server 8000",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "spanish",
+    "language-learning",
+    "flashcards",
+    "quiz",
+    "education",
+    "interactive",
+    "web-app",
+    "javascript",
+    "html5",
+    "css3"
+  ],
+  "author": "Language Map Quest Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/language-map-quest.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/language-map-quest/issues"
+  },
+  "homepage": "https://github.com/yourusername/language-map-quest#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {},
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+} 
