@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Play Mode - Language Map Quest</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1>🗺️ Language Map Quest - Play Mode Test</h1>
+      </div>
+      <div class="header-right">
+        <div class="xp-info">
+          <span id="xpCounter" class="xp-num">0 XP</span>
+          <span id="levelLabel" class="level">Lvl 1</span>
+          <progress id="xpBar" value="0" max="100"></progress>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-navigation">
+      <button class="tab-btn" data-tab="map">
+        🗺️ Regiones de Español
+      </button>
+      <button class="tab-btn active" data-tab="play">
+        🎯 Jugar
+      </button>
+    </nav>
+
+    <!-- Tab Content -->
+    <main class="tab-content">
+      <!-- Play Tab -->
+      <section id="play-tab" class="tab-panel active">
+        <div class="play-section">
+          <div class="play-header">
+            <h3 id="playTitle">Modo Jugar</h3>
+            <div class="play-stats">
+              <span id="currentRegionName" class="current-region">Cargando...</span>
+              <span id="playProgress" class="play-progress">0/0</span>
+            </div>
+          </div>
+          
+          <div id="playBody" class="play-body">
+            <p class="placeholder-text">Comenzando el modo jugar...</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/game.js"></script>
+  <script type="module">
+    // Import PlayView directly for testing
+    import PlayView from './js/PlayView.js';
+    
+    // Create a minimal UI object for testing
+    const testUI = {
+      elements: {
+        playBody: document.getElementById('playBody')
+      },
+      updateXPDisplay: () => {
+        const levelInfo = game.getLevelInfo();
+        document.getElementById('xpCounter').textContent = `${formatXP(levelInfo.xp)} XP`;
+        document.getElementById('levelLabel').textContent = `Lvl ${levelInfo.level}`;
+        document.getElementById('xpBar').value = levelInfo.levelProgress;
+      },
+      showPopup: (word, explanation, event) => {
+        console.log(`Popup: ${word} - ${explanation}`);
+      }
+    };
+    
+    // Initialize play view
+    const playView = new PlayView(testUI);
+    
+    // Make it globally available for onclick handlers
+    window.ui = { playView };
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      testUI.updateXPDisplay();
+      playView.startPlay();
+      console.log('🚀 Play Mode Test initialized!');
+    });
+  </script>
+</body>
+</html>
