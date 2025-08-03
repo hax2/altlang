@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-word Phrase Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .clickable-word {
+            cursor: pointer;
+            color: inherit;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+            padding: 1px 2px;
+        }
+        .clickable-word:hover {
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
+        }
+        .clickable-word.multi-word-phrase {
+            border-bottom: 2px dotted rgba(59, 130, 246, 0.6);
+            padding: 2px 4px;
+            margin: 0 1px;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        .clickable-word.multi-word-phrase:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-bottom-color: #3b82f6;
+            border-bottom-style: solid;
+        }
+        .test-result {
+            margin-top: 20px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Multi-word Phrase Test</h1>
+        <p>Testing the makeWordsClickable function with multi-word phrases:</p>
+        
+        <div id="test-output" class="test-result">
+            <!-- Test results will appear here -->
+        </div>
+        
+        <div id="click-result" class="test-result" style="display: none;">
+            <strong>Clicked word:</strong> <span id="clicked-word"></span><br>
+            <strong>Explanation:</strong> <span id="clicked-explanation"></span>
+        </div>
+    </div>
+
+    <script>
+        // Simplified version of the makeWordsClickable function
+        function makeWordsClickable(text, breakdown = {}) {
+            if (!breakdown || Object.keys(breakdown).length === 0) {
+                return text;
+            }
+            
+            let processedText = text;
+            
+            // First, identify and process multi-word phrases
+            const sortedKeys = Object.keys(breakdown).sort((a, b) => b.length - a.length);
+            
+            sortedKeys.forEach(phrase => {
+                if (phrase.includes(' ')) {
+                    const explanation = breakdown[phrase];
+                    const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`\\b${escapedPhrase}\\b`, 'gi');
+                    
+                    processedText = processedText.replace(regex, (match) => {
+                        return `<span class="clickable-word multi-word-phrase" data-word="${phrase}" data-explanation="${explanation}">${match}</span>`;
+                    });
+                }
+            });
+            
+            // Then process individual words that haven't been wrapped yet
+            const parts = processedText.split(/(\s+|[.,!?;:])/);
+            
+            const result = parts.map(part => {
+                const cleanPart = part.trim();
+                
+                if (!cleanPart || /^\s*$/.test(part) || part.includes('<span')) {
+                    return part;
+                }
+                
+                const explanation = breakdown[cleanPart] || breakdown[part];
+                if (explanation && !cleanPart.includes(' ')) {
+                    return `<span class="clickable-word" data-word="${cleanPart}" data-explanation="${explanation}">${part}</span>`;
+                }
+                
+                return part;
+            }).join('');
+            
+            return result;
+        }
+
+        // Test data
+        const testCases = [
+            {
+                text: 'Nos vemos más tarde.',
+                breakdown: { 
+                    'Nos': 'us', 
+                    'vemos': 'we see', 
+                    'más tarde': 'later', 
+                    'más': 'more', 
+                    'tarde': 'late' 
+                }
+            },
+            {
+                text: 'Voy a llegar más tarde de lo normal.',
+                breakdown: { 
+                    'Voy a': 'I am going to', 
+                    'llegar': 'arrive', 
+                    'más tarde': 'later', 
+                    'de lo normal': 'than usual', 
+                    'más': 'more', 
+                    'tarde': 'late', 
+                    'de': 'of', 
+                    'lo': 'the', 
+                    'normal': 'normal' 
+                }
+            },
+            {
+                text: 'Soy alérgico a los frutos secos.',
+                breakdown: { 
+                    'Soy': 'I am', 
+                    'alérgico': 'allergic', 
+                    'a': 'to', 
+                    'los': 'the', 
+                    'frutos secos': 'nuts' 
+                }
+            }
+        ];
+
+        // Run tests
+        const outputDiv = document.getElementById('test-output');
+        let testResults = '<h3>Test Results:</h3>';
+
+        testCases.forEach((testCase, index) => {
+            const result = makeWordsClickable(testCase.text, testCase.breakdown);
+            testResults += `
+                <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                    <strong>Test ${index + 1}:</strong><br>
+                    <strong>Original:</strong> ${testCase.text}<br>
+                    <strong>Result:</strong> ${result}
+                </div>
+            `;
+        });
+
+        outputDiv.innerHTML = testResults;
+
+        // Add click handlers
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('clickable-word')) {
+                const word = e.target.dataset.word;
+                const explanation = e.target.dataset.explanation;
+                
+                document.getElementById('clicked-word').textContent = word;
+                document.getElementById('clicked-explanation').textContent = explanation;
+                document.getElementById('click-result').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

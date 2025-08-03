@@ -111,23 +111,48 @@ class LanguageGameUI {
       return text; // Return original text if no breakdown available
     }
     
-    // Split text into words and punctuation
-    const words = text.split(/(\s+|[.,!?;:])/);
+    let processedText = text;
     
-    return words.map(word => {
-      const cleanWord = word.trim();
-      if (!cleanWord || /^\s*$/.test(word)) {
-        return word; // Return spaces and punctuation as-is
+    // First, identify and process multi-word phrases
+    // Sort breakdown keys by length (longest first) to handle overlapping phrases correctly
+    const sortedKeys = Object.keys(breakdown).sort((a, b) => b.length - a.length);
+    
+    sortedKeys.forEach(phrase => {
+      // Only process phrases that contain spaces (multi-word phrases)
+      if (phrase.includes(' ')) {
+        const explanation = breakdown[phrase];
+        // Create a regex that matches the phrase with word boundaries
+        // Use case-insensitive matching and handle punctuation
+        const regex = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+        
+        processedText = processedText.replace(regex, (match) => {
+          return `<span class="clickable-word multi-word-phrase" data-word="${phrase}" data-explanation="${explanation}">${match}</span>`;
+        });
+      }
+    });
+    
+    // Then process individual words that haven't been wrapped yet
+    // Split by spaces and punctuation, but preserve the delimiters
+    const parts = processedText.split(/(\s+|[.,!?;:])/);
+    
+    const result = parts.map(part => {
+      const cleanPart = part.trim();
+      
+      // Skip if it's whitespace, punctuation, or already wrapped in a span
+      if (!cleanPart || /^\s*$/.test(part) || part.includes('<span')) {
+        return part;
       }
       
-      // Check if this word exists in breakdown
-      const explanation = breakdown[cleanWord] || breakdown[word];
-      if (explanation) {
-        return `<span class="clickable-word" data-word="${cleanWord}" data-explanation="${explanation}">${word}</span>`;
+      // Check if this individual word exists in breakdown (and isn't a multi-word phrase)
+      const explanation = breakdown[cleanPart] || breakdown[part];
+      if (explanation && !cleanPart.includes(' ')) {
+        return `<span class="clickable-word" data-word="${cleanPart}" data-explanation="${explanation}">${part}</span>`;
       }
       
-      return word; // Return word as-is if no explanation
+      return part; // Return part as-is if no explanation
     }).join('');
+    
+    return result;
   }
 
   /**

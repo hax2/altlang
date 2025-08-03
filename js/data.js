@@ -126,6 +126,13 @@ const REGIONS = {
         breakdown: { 'Hasta': 'until', 'luego': 'later' }
       },
       {
+        front: 'Nos vemos más tarde.',
+        back: 'See you later.',
+        context: 'Another way to say goodbye, literally meaning "we see each other later".',
+        grammar: 'Nos vemos = we see each other (reflexive)',
+        breakdown: { 'Nos': 'us', 'vemos': 'we see', 'más tarde': 'later', 'más': 'more', 'tarde': 'late' }
+      },
+      {
         front: 'Adiós, que te vaya bien.',
         back: 'Goodbye, take care. / I hope it goes well for you.',
         context: 'A warm and kind way to say goodbye.',
@@ -208,6 +215,13 @@ const REGIONS = {
         context: 'Crucial phrase to communicate a food allergy. Use "alérgico" for male, "alérgica" for female.',
         grammar: 'Soy = I am (ser verb), alérgico/a = allergic',
         breakdown: { 'Soy': 'I am', 'alérgico/a': 'allergic', 'a': 'to', 'los': 'the', 'frutos secos': 'nuts' }
+      },
+      {
+        front: 'Voy a llegar más tarde de lo normal.',
+        back: 'I am going to arrive later than usual.',
+        context: 'Informing someone that you will be delayed.',
+        grammar: 'Voy a + infinitive = I am going to (near future)',
+        breakdown: { 'Voy a': 'I am going to', 'llegar': 'arrive', 'más tarde': 'later', 'de lo normal': 'than usual', 'más': 'more', 'tarde': 'late', 'de': 'of', 'lo': 'the', 'normal': 'normal' }
       },
       {
         front: '¡La comida estuvo deliciosa!',
@@ -557,7 +571,7 @@ const REGIONS = {
         back: 'Will you travel during the holidays?',
         context: 'Asking about someone\'s vacation plans.',
         grammar: 'Viajarás = You will travel (future tense of viajar, tú form)',
-        breakdown: { '¿Viajarás': 'Will you travel', 'durante': 'during', 'las vacaciones?': 'the holidays?' }
+        breakdown: { '¿Viajarás': 'Will you travel', 'durante': 'during', 'las vacaciones': 'the holidays', 'las': 'the', 'vacaciones': 'holidays' }
       },
       {
         front: 'Creo que lloverá más tarde.',

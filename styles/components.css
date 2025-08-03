@@ -826,6 +826,20 @@
   transform: translateY(0);
 }
 
+/* Multi-word phrase styling */
+.clickable-word.multi-word-phrase {
+  border-bottom: 2px dotted rgba(59, 130, 246, 0.6);
+  padding: 2px 4px;
+  margin: 0 1px;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.clickable-word.multi-word-phrase:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-bottom-color: var(--clr-primary);
+  border-bottom-style: solid;
+}
+
 /* Word Popup */
 .word-popup {
   position: fixed;
