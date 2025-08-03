@@ -3,7 +3,9 @@
 const REGIONS = {
   basics: {
     name: 'Básicos',
+    emoji: '🌟',
     color: '#F87171',
+    category: 'Fundamentos',
     description: 'Essential phrases for everyday communication - Use these when you need to be polite, ask for help, or express basic needs in any situation.',
     flashcards: [
       { 
@@ -73,7 +75,9 @@ const REGIONS = {
   },
   greetings: {
     name: 'Saludos',
+    emoji: '👋',
     color: '#F59E0B',
+    category: 'Fundamentos',
     description: 'Greetings and introductions - Use these when meeting people, starting conversations, or being polite in social situations.',
     flashcards: [
       { 
@@ -143,7 +147,9 @@ const REGIONS = {
   },
   travel: {
     name: 'Viaje',
+    emoji: '✈️',
     color: '#10B981',
+    category: 'Situaciones',
     description: 'Travel and transportation vocabulary - Use these when navigating airports, train stations, hotels, and asking for directions while traveling.',
     flashcards: [
       { 
@@ -192,7 +198,9 @@ const REGIONS = {
   },
   food: {
     name: 'Comida',
+    emoji: '🍽️',
     color: '#3B82F6',
+    category: 'Situaciones',
     description: 'Food and dining vocabulary - Use these in restaurants, cafes, and when discussing food preferences or dietary needs.',
     flashcards: [
       { 
@@ -248,7 +256,9 @@ const REGIONS = {
   },
   shopping: {
     name: 'Compras',
+    emoji: '🛍️',
     color: '#8B5CF6',
+    category: 'Situaciones',
     description: 'Shopping and commerce vocabulary - Use these in stores, markets, and when making purchases or asking about products.',
     flashcards: [
       { 
@@ -297,7 +307,9 @@ const REGIONS = {
   },
   directions: {
     name: 'Direcciones',
+    emoji: '🧭',
     color: '#0EA5E9',
+    category: 'Situaciones',
     description: 'Navigating and asking for directions - Use these phrases when you are lost or trying to find a specific location.',
     flashcards: [
       {
@@ -339,7 +351,9 @@ const REGIONS = {
   },
   weather: {
     name: 'El Clima',
+    emoji: '🌤️',
     color: '#F472B6',
+    category: 'Conversación',
     description: 'Talking about the weather - Use these common phrases to describe or ask about meteorological conditions.',
     flashcards: [
       {
@@ -381,7 +395,9 @@ const REGIONS = {
   },
   health: {
     name: 'Salud',
+    emoji: '🏥',
     color: '#14B8A6',
+    category: 'Situaciones',
     description: 'Health and medical vocabulary - Use these when visiting doctors, pharmacies, or describing health problems.',
     flashcards: [
       { 
@@ -423,7 +439,9 @@ const REGIONS = {
   },
   family: {
     name: 'Familia',
+    emoji: '👨‍👩‍👧‍👦',
     color: '#A78BFA',
+    category: 'Conversación',
     description: 'Talking about family - Phrases to introduce, describe, and ask about family members.',
     flashcards: [
         {
@@ -465,7 +483,9 @@ const REGIONS = {
   },
   hobbies: {
     name: 'Pasatiempos',
+    emoji: '🎨',
     color: '#FB923C',
+    category: 'Conversación',
     description: 'Discussing hobbies and leisure activities - What you like to do in your free time.',
     flashcards: [
         {
@@ -507,7 +527,9 @@ const REGIONS = {
   },
   pastTensePreterite: {
     name: 'Pasado (Pretérito)',
+    emoji: '⏰',
     color: '#60A5FA',
+    category: 'Gramática',
     description: 'Talking about the past using the Preterite tense, for completed actions.',
     flashcards: [
       {
@@ -549,7 +571,9 @@ const REGIONS = {
   },
   futureTense: {
     name: 'Futuro',
+    emoji: '🔮',
     color: '#F472B6',
+    category: 'Gramática',
     description: 'Talking about the future - Phrases for plans, predictions, and upcoming events.',
     flashcards: [
       {

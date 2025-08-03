@@ -1,3 +1,50 @@
+/* Category Sections */
+.category-section {
+  margin-bottom: var(--spacing-2xl);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.category-section:nth-child(1) { animation-delay: 0.1s; }
+.category-section:nth-child(2) { animation-delay: 0.2s; }
+.category-section:nth-child(3) { animation-delay: 0.3s; }
+.category-section:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.category-header {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md) 0 var(--spacing-sm);
+  border-bottom: 3px solid var(--clr-border);
+  background: linear-gradient(90deg, var(--clr-surface), transparent);
+  border-radius: var(--radius-sm);
+}
+
+.category-header h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--clr-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
 /* Map Region Components */
 .region-card {
   padding: var(--spacing-lg);
@@ -7,36 +54,83 @@
   border: 2px solid transparent;
   position: relative;
   overflow: hidden;
-  min-height: 120px;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 100%);
+}
+
+.region-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .region-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.region-card:hover::before {
+  opacity: 1;
+}
+
+.region-card:hover .region-emoji {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .region-card.selected {
   border-color: var(--clr-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
 }
 
-.region-card h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: var(--spacing-sm);
-  color: white;
+.region-card.selected::before {
+  opacity: 0.7;
+}
+
+.region-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
   z-index: 2;
   position: relative;
+}
+
+.region-emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  transition: transform 0.3s ease;
+}
+
+.region-info {
+  flex: 1;
+}
+
+.region-info h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 var(--spacing-xs) 0;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .region-card .progress-info {
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.9);
-  z-index: 2;
-  position: relative;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Enhanced Tab Styling */
