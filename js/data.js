@@ -480,7 +480,7 @@ const REGIONS = {
             back: 'Do you like to watch movies?',
             context: 'Asking someone about their interest in movies.',
             grammar: '¿Te gusta...? = Do you like...?',
-            breakdown: { '¿Te gusta': 'Do you like', 'ver': 'to watch', 'películas?': 'movies?' }
+            breakdown: { '¿Te gusta': 'Do you like', 'ver': 'to watch', 'películas': 'movies' }
         },
         {
             front: 'Mi pasatiempo favorito es tocar la guitarra.',

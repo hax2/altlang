@@ -220,25 +220,26 @@
 }
 
 .details-content {
-  padding: var(--spacing-md);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  padding: var(--spacing-lg);
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
 .context-note,
 .grammar-note {
-  margin-bottom: var(--spacing-sm);
-  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
   border-radius: var(--radius-sm);
   background: rgba(59, 130, 246, 0.1);
   border-left: 3px solid var(--clr-primary);
+  font-size: 1rem;
 }
 
 .context-note strong,
 .grammar-note strong {
   color: var(--clr-primary);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 1rem;
 }
 
 .word-breakdown {
@@ -249,23 +250,23 @@
   color: var(--clr-primary);
   font-weight: 600;
   display: block;
-  margin-bottom: var(--spacing-xs);
-  font-size: 0.85rem;
+  margin-bottom: var(--spacing-sm);
+  font-size: 1rem;
 }
 
 .breakdown-items {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
 }
 
 .breakdown-item {
-  padding: var(--spacing-xs);
+  padding: var(--spacing-sm);
   background: rgba(16, 185, 129, 0.1);
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--clr-success);
-  font-size: 0.8rem;
-  line-height: 1.4;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .breakdown-item .word {
@@ -450,6 +451,45 @@
 .correct-answer {
   font-weight: 600;
   margin: var(--spacing-xs) 0;
+}
+
+/* Call & Response Control Buttons */
+.cr-controls {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  margin-top: var(--spacing-md);
+}
+
+.cr-try-again,
+.cr-continue {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cr-try-again {
+  background: var(--clr-warning);
+  color: white;
+}
+
+.cr-try-again:hover {
+  background: #d97706;
+  transform: translateY(-1px);
+}
+
+.cr-continue {
+  background: var(--clr-primary);
+  color: white;
+}
+
+.cr-continue:hover {
+  background: var(--clr-secondary);
+  transform: translateY(-1px);
 }
 
 /* Progress Bar Components */
