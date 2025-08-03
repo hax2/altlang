@@ -519,10 +519,12 @@ class LanguageGameUI {
         <div class="flashcard-inner">
           <div class="flashcard-front">
             <button class="tts-btn" onclick="event.stopPropagation(); ui.speakCard('${card.front}')">🔊</button>
+            <div class="flip-indicator">🔄</div>
             ${this.makeWordsClickable(card.front, card.breakdown)}
           </div>
           <div class="flashcard-back">
             <button class="tts-btn" onclick="event.stopPropagation(); ui.speakCard('${card.back}', 'en')">🔊</button>
+            <div class="flip-indicator">🔄</div>
             ${this.makeWordsClickable(card.back, card.breakdown)}
           </div>
         </div>

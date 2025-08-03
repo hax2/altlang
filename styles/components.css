@@ -302,6 +302,53 @@
   background: rgba(59, 130, 246, 0.3);
 }
 
+/* Flip Indicator Styling */
+.flip-indicator {
+  position: absolute;
+  bottom: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  backdrop-filter: blur(4px);
+  z-index: 4;
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+  pointer-events: none;
+}
+
+.flashcard:hover .flip-indicator {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1) rotate(180deg);
+  animation: none;
+}
+
+.flashcard-back .flip-indicator {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--clr-primary);
+}
+
+.flashcard-back:hover .flip-indicator {
+  background: rgba(59, 130, 246, 0.3);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
 /* Flashcard Details Card - SEPARATE CARD DESIGN */
 .flashcard-details-card {
   margin-top: var(--spacing-md);
@@ -374,6 +421,7 @@
   justify-content: center;
   gap: var(--spacing-md);
   margin-top: var(--spacing-md);
+  flex-wrap: wrap;
 }
 
 .flashcard-btn {
@@ -384,6 +432,8 @@
   font-size: .9rem;
   font-weight: 600;
   transition: all 0.2s ease;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .flashcard-btn.primary {
@@ -403,6 +453,35 @@
 
 .flashcard-btn.secondary:hover {
   background: var(--clr-background);
+}
+
+/* Mobile responsive adjustments for flashcard controls */
+@media (max-width: 768px) {
+  .flashcard-controls {
+    gap: var(--spacing-sm);
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .flashcard-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: 0;
+    max-width: calc(50% - var(--spacing-xs));
+  }
+  
+  /* Stack buttons vertically on very small screens */
+  @media (max-width: 480px) {
+    .flashcard-controls {
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+    
+    .flashcard-btn {
+      max-width: none;
+      width: 100%;
+    }
+  }
 }
 
 /* Quiz Components */
