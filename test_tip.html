@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Tip Notification</title>
+    <script>
+        // Clear the tip flag so we can test it
+        localStorage.removeItem('flashcardTipSeen');
+        alert('Tip flag cleared! Now go to the main app, select a region, and click on Flashcards to see the new tip notification.');
+    </script>
+</head>
+<body>
+    <h1>Tip Test Helper</h1>
+    <p>The localStorage flag has been cleared. Go back to your main app and test the flashcard tip!</p>
+    
+    <button onclick="localStorage.removeItem('flashcardTipSeen'); alert('Flag cleared again!')">
+        Clear Tip Flag Again
+    </button>
+</body>
+</html>

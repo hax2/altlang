@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    <div id="output"></div>
+    
+    <script src="js/data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        console.log('=== DEBUG TEST ===');
+        console.log('REGIONS loaded:', typeof REGIONS !== 'undefined');
+        console.log('game loaded:', typeof game !== 'undefined');
+        console.log('speakSpanish loaded:', typeof speakSpanish !== 'undefined');
+        
+        if (typeof game !== 'undefined') {
+            console.log('Game XP:', game.xp);
+            console.log('Game regions:', game.getAllRegionsWithProgress());
+        }
+        
+        document.getElementById('output').innerHTML = `
+            <p>REGIONS: ${typeof REGIONS !== 'undefined' ? 'OK' : 'MISSING'}</p>
+            <p>game: ${typeof game !== 'undefined' ? 'OK' : 'MISSING'}</p>
+            <p>speakSpanish: ${typeof speakSpanish !== 'undefined' ? 'OK' : 'MISSING'}</p>
+        `;
+    </script>
+    
+    <script type="module">
+        try {
+            const ui = await import('./js/ui.js');
+            console.log('UI module loaded:', ui);
+            console.log('UI default export:', ui.default);
+            document.getElementById('output').innerHTML += '<p>UI Module: OK</p>';
+        } catch (error) {
+            console.error('UI module failed to load:', error);
+            document.getElementById('output').innerHTML += `<p>UI Module: ERROR - ${error.message}</p>`;
+        }
+    </script>
+</body>
+</html>

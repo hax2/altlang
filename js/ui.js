@@ -1,4 +1,4 @@
-// UI Components and Rendering
+// UI Components and Rendering - Consolidated Version
 
 class LanguageGameUI {
   constructor() {
@@ -15,25 +15,23 @@ class LanguageGameUI {
       xpBar: document.getElementById('xpBar')
     };
 
+    // Initialize view state
+    this.flashcardTipOverlay = null;
+
+    this.currentTab = 'map';
     this.currentCardIndex = 0;
     this.currentCards = [];
-    this.currentCard = null; // Store current card for word lookups
-    this.popup = null; // Store popup element
-    this.currentTab = 'map'; // Track current active tab
+    this.currentCard = null;
+    this.popup = null;
 
     this.initializeEventListeners();
   }
 
-  /**
-   * Initialize event listeners
-   */
   initializeEventListeners() {
-    // Mode button listeners
     this.elements.flashcardBtn.addEventListener('click', () => this.switchMode('flashcard'));
     this.elements.quizBtn.addEventListener('click', () => this.switchMode('quiz'));
     this.elements.crBtn.addEventListener('click', () => this.switchMode('call-response'));
 
-    // Tab navigation listeners
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -42,7 +40,6 @@ class LanguageGameUI {
       });
     });
 
-    // Close popup when clicking outside
     document.addEventListener('click', (e) => {
       if (this.popup && !this.popup.contains(e.target) && !e.target.classList.contains('clickable-word')) {
         this.hidePopup();
@@ -50,12 +47,8 @@ class LanguageGameUI {
     });
   }
 
-  /**
-   * Switch between tabs
-   * @param {string} tabName - Name of the tab to switch to
-   */
   switchTab(tabName) {
-    // Update tab button states
+    // Update tab buttons
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
       btn.classList.remove('active');
@@ -64,18 +57,18 @@ class LanguageGameUI {
       }
     });
 
-    // Update tab panel visibility
+    // Update tab panels
     const tabPanels = document.querySelectorAll('.tab-panel');
     tabPanels.forEach(panel => {
       panel.classList.remove('active');
-      if (panel.id === `${tabName}-tab`) {
-        panel.classList.add('active');
-      }
     });
 
-    this.currentTab = tabName;
+    const activePanel = document.getElementById(`${tabName}-tab`);
+    if (activePanel) {
+      activePanel.classList.add('active');
+    }
 
-    // Update content based on tab
+    // Render content for the active tab
     switch (tabName) {
       case 'map':
         this.renderMap();
@@ -88,372 +81,11 @@ class LanguageGameUI {
         break;
     }
 
-    // Save current tab to localStorage
+    this.currentTab = tabName;
     localStorage.setItem('currentTab', tabName);
   }
 
-  /**
-   * Get the current active tab
-   * @returns {string} Current tab name
-   */
-  getCurrentTab() {
-    return this.currentTab;
-  }
-
-  /**
-   * Create clickable word spans from text
-   * @param {string} text - Text to make clickable
-   * @param {Object} breakdown - Word breakdown object
-   * @returns {string} - HTML with clickable words
-   */
-  makeWordsClickable(text, breakdown = {}) {
-    if (!breakdown || Object.keys(breakdown).length === 0) {
-      return text; // Return original text if no breakdown available
-    }
-
-    let processedText = text;
-
-    // First, identify and process multi-word phrases
-    // Sort breakdown keys by length (longest first) to handle overlapping phrases correctly
-    const sortedKeys = Object.keys(breakdown).sort((a, b) => b.length - a.length);
-
-    sortedKeys.forEach(phrase => {
-      // Only process phrases that contain spaces (multi-word phrases)
-      if (phrase.includes(' ')) {
-        const explanation = breakdown[phrase];
-        // Create a regex that matches the phrase, handling punctuation at start/end
-        // Escape special regex characters
-        const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-        // For phrases that start with punctuation, don't use word boundary at the start
-        // For phrases that end with punctuation, don't use word boundary at the end
-        const startsWithPunctuation = /^[¿¡.,!?;:]/.test(phrase);
-        const endsWithPunctuation = /[.,!?;:]$/.test(phrase);
-
-        let regexPattern;
-        if (startsWithPunctuation && endsWithPunctuation) {
-          regexPattern = escapedPhrase; // No word boundaries
-        } else if (startsWithPunctuation) {
-          regexPattern = `${escapedPhrase}\\b`; // Only end boundary
-        } else if (endsWithPunctuation) {
-          regexPattern = `\\b${escapedPhrase}`; // Only start boundary
-        } else {
-          regexPattern = `\\b${escapedPhrase}\\b`; // Both boundaries
-        }
-
-        const regex = new RegExp(regexPattern, 'gi');
-
-        processedText = processedText.replace(regex, (match) => {
-          return `<span class="clickable-word multi-word-phrase" data-word="${phrase}" data-explanation="${explanation}">${match}</span>`;
-        });
-      }
-    });
-
-    // Then process individual words that haven't been wrapped yet
-    // Use a more careful approach that preserves spacing
-    const tokens = processedText.split(/(\s+)/); // Split only on whitespace, preserve spaces
-
-    const result = tokens.map(token => {
-      // If it's just whitespace, return as-is
-      if (/^\s+$/.test(token)) {
-        return token;
-      }
-
-      // If it already contains a span (already processed), return as-is
-      if (token.includes('<span')) {
-        return token;
-      }
-
-      // Split the token by punctuation while preserving the punctuation
-      const parts = token.split(/([.,!?;:])/);
-
-      return parts.map(part => {
-        if (!part || /^[.,!?;:]$/.test(part)) {
-          return part; // Return punctuation as-is
-        }
-
-        const cleanPart = part.trim();
-        if (!cleanPart) {
-          return part;
-        }
-
-        // Check if this individual word exists in breakdown (and isn't a multi-word phrase)
-        const explanation = breakdown[cleanPart] || breakdown[part];
-        if (explanation && !cleanPart.includes(' ')) {
-          return `<span class="clickable-word" data-word="${cleanPart}" data-explanation="${explanation}">${part}</span>`;
-        }
-
-        return part; // Return part as-is if no explanation
-      }).join('');
-    }).join('');
-
-    return result;
-  }
-
-  /**
-   * Show word popup
-   * @param {string} word - The word clicked
-   * @param {string} explanation - The explanation for the word
-   * @param {Event} event - Click event
-   */
-  showPopup(word, explanation, event) {
-    // Hide existing popup
-    this.hidePopup();
-
-    // Create popup element
-    this.popup = document.createElement('div');
-    this.popup.className = 'word-popup';
-    this.popup.innerHTML = `
-      <div class="popup-content">
-        <div class="popup-header">
-          <span class="popup-word">${word}</span>
-          <button class="popup-close" onclick="ui.hidePopup()">×</button>
-        </div>
-        <div class="popup-body">
-          <div class="popup-explanation">${explanation}</div>
-        </div>
-      </div>
-    `;
-
-    // Position popup near the clicked word
-    const rect = event.target.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-
-    // Calculate initial position
-    let top = rect.bottom + scrollTop + 5;
-    let left = rect.left + scrollLeft;
-
-    // Add to body first to get popup dimensions
-    document.body.appendChild(this.popup);
-
-    // Adjust position to keep popup on screen
-    const popupRect = this.popup.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // Adjust horizontal position
-    if (left + popupRect.width > viewportWidth + scrollLeft) {
-      left = viewportWidth + scrollLeft - popupRect.width - 10;
-    }
-    if (left < scrollLeft) {
-      left = scrollLeft + 10;
-    }
-
-    // Adjust vertical position
-    if (top + popupRect.height > viewportHeight + scrollTop) {
-      // Show above the word if there's not enough space below
-      top = rect.top + scrollTop - popupRect.height - 5;
-    }
-    if (top < scrollTop) {
-      top = scrollTop + 10;
-    }
-
-    this.popup.style.position = 'absolute';
-    this.popup.style.top = `${top}px`;
-    this.popup.style.left = `${left}px`;
-
-    // Add click event to close popup
-    this.popup.addEventListener('click', (e) => {
-      if (e.target.classList.contains('popup-close')) {
-        this.hidePopup();
-      }
-    });
-  }
-
-  /**
-   * Hide word popup
-   */
-  hidePopup() {
-    if (this.popup) {
-      this.popup.remove();
-      this.popup = null;
-    }
-  }
-
-  /**
-   * Add click handlers to clickable words
-   */
-  addWordClickHandlers() {
-    const clickableWords = document.querySelectorAll('.clickable-word');
-    clickableWords.forEach(word => {
-      word.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const wordText = word.dataset.word;
-        const explanation = word.dataset.explanation;
-
-        // Determine language by checking if the word is on the front or back of the card
-        const isFront = e.target.closest('.flashcard-front');
-        const lang = isFront ? 'es' : 'en';
-
-        // Speak the clicked word
-        speakSpanish(wordText, lang);
-
-        // Show the definition popup
-        this.showPopup(wordText, explanation, e);
-      });
-    });
-  }
-
-  /**
-   * Add click handlers to quiz options
-   */
-  addQuizOptionHandlers() {
-    const quizOptions = document.querySelectorAll('.quiz-option');
-    quizOptions.forEach(option => {
-      option.addEventListener('click', (e) => {
-        const userAnswer = option.dataset.answer;
-        const correctAnswer = option.dataset.correct;
-        this.checkQuizAnswer(userAnswer, correctAnswer);
-      });
-    });
-  }
-
-  /**
-   * Update XP display with level information
-   */
-  updateXPDisplay() {
-    const lvl = game.getLevelInfo();
-    this.elements.xpCounter.textContent = `${formatXP(game.xp)} XP`;
-    document.getElementById('levelLabel').textContent = `Lvl ${lvl.level}`;
-    const bar = document.getElementById('xpBar');
-    bar.max = lvl.xpNeeded;
-    bar.value = lvl.xpProgress;
-  }
-
-  /**
-   * Render the map with all regions grouped by category
-   */
-  renderMap() {
-    this.elements.mapContainer.innerHTML = '';
-
-    const regionsWithProgress = game.getAllRegionsWithProgress();
-    
-    // Group regions by category
-    const groupedRegions = {};
-    Object.entries(regionsWithProgress).forEach(([regionKey, regionData]) => {
-      const category = regionData.category || 'Otros';
-      if (!groupedRegions[category]) {
-        groupedRegions[category] = [];
-      }
-      groupedRegions[category].push({ key: regionKey, data: regionData });
-    });
-
-    // Define category order and emojis
-    const categoryOrder = ['Fundamentos', 'Situaciones', 'Conversación', 'Gramática'];
-    const categoryEmojis = {
-      'Fundamentos': '🌟',
-      'Situaciones': '🎯',
-      'Conversación': '💬',
-      'Gramática': '📚'
-    };
-
-    // Render each category
-    categoryOrder.forEach(category => {
-      if (!groupedRegions[category]) return;
-
-      // Create category section
-      const categorySection = document.createElement('div');
-      categorySection.className = 'category-section';
-      
-      const categoryHeader = document.createElement('div');
-      categoryHeader.className = 'category-header';
-      categoryHeader.innerHTML = `
-        <h3>${categoryEmojis[category]} ${category}</h3>
-      `;
-      
-      const categoryGrid = document.createElement('div');
-      categoryGrid.className = 'category-grid';
-
-      // Add regions to this category
-      groupedRegions[category].forEach(({ key: regionKey, data: regionData }) => {
-        const regionCard = document.createElement('div');
-        regionCard.className = 'region-card';
-        regionCard.style.backgroundColor = regionData.color;
-        regionCard.setAttribute('data-region', regionKey);
-
-        const progress = regionData.progress;
-        const percentage = Math.round(progress.percentage);
-
-        regionCard.innerHTML = `
-          <div class="region-content">
-            <div class="region-emoji">${regionData.emoji}</div>
-            <div class="region-info">
-              <h4>${regionData.name}</h4>
-              <div class="progress-info">
-                ${progress.learned}/${progress.total} (${percentage}%)
-              </div>
-            </div>
-          </div>
-          <div class="region-progress-bar">
-            <div class="region-progress-fill" style="width: ${percentage}%"></div>
-          </div>
-        `;
-
-        regionCard.addEventListener('click', () => this.selectRegion(regionKey));
-        categoryGrid.appendChild(regionCard);
-      });
-
-      categorySection.appendChild(categoryHeader);
-      categorySection.appendChild(categoryGrid);
-      this.elements.mapContainer.appendChild(categorySection);
-    });
-  }
-
-  /**
-   * Select a region and update UI
-   * @param {string} regionKey - Region key
-   */
-  selectRegion(regionKey) {
-    game.setCurrentRegion(regionKey);
-
-    // Update map selection
-    const regionCards = this.elements.mapContainer.querySelectorAll('.region-card');
-    regionCards.forEach(card => card.classList.remove('selected'));
-
-    const selectedCard = this.elements.mapContainer.querySelector(`[data-region="${regionKey}"]`);
-    if (selectedCard) {
-      selectedCard.classList.add('selected');
-    }
-
-    // Update panel title
-    const region = REGIONS[regionKey];
-    this.elements.panelTitle.textContent = region.name;
-
-    // Switch to game tab and render current mode
-    this.switchTab('game');
-    this.renderCurrentMode();
-  }
-
-  /**
-   * Switch game mode
-   * @param {string} mode - New mode
-   */
-  switchMode(mode) {
-    game.setCurrentMode(mode);
-
-    // Update button states
-    const modeButtons = [this.elements.flashcardBtn, this.elements.quizBtn, this.elements.crBtn];
-    modeButtons.forEach(btn => btn.classList.remove('active'));
-
-    const activeButton = this.elements[`${mode.replace('-', '')}Btn`];
-    if (activeButton) {
-      activeButton.classList.add('active');
-    }
-
-    // Render the new mode
-    this.renderCurrentMode();
-  }
-
-  /**
-   * Render the current game mode
-   */
   renderCurrentMode() {
-    if (!game.currentRegionKey) {
-      this.renderPlaceholder();
-      return;
-    }
-
     switch (game.currentMode) {
       case 'flashcard':
         this.renderFlashcards();
@@ -467,33 +99,18 @@ class LanguageGameUI {
     }
   }
 
-  /**
-   * Render placeholder when no region is selected
-   */
-  renderPlaceholder() {
-    this.elements.panelBody.innerHTML = `
-      <p class="placeholder-text">Elige una región del mapa para comenzar a aprender español.</p>
-    `;
-  }
-
-  /**
-   * Render flashcards mode
-   */
   renderFlashcards() {
     const flashcards = game.getCurrentFlashcards();
     if (flashcards.length === 0) {
       this.elements.panelBody.innerHTML = '<p class="text-center">No hay flashcards disponibles.</p>';
       return;
     }
-
+    this.showFirstTimeFlashcardTip();
     this.currentCards = flashcards;
     this.currentCardIndex = 0;
     this.renderCurrentFlashcard();
   }
 
-  /**
-   * Render current flashcard
-   */
   renderCurrentFlashcard() {
     if (this.currentCardIndex >= this.currentCards.length) {
       this.elements.panelBody.innerHTML = `
@@ -507,13 +124,9 @@ class LanguageGameUI {
       `;
       return;
     }
-
     const card = this.currentCards[this.currentCardIndex];
-    this.currentCard = card; // Store current card for word lookups
-
-    // Check if card has enhanced information
+    this.currentCard = card;
     const hasEnhancedInfo = card.context || card.grammar || card.breakdown;
-
     this.elements.panelBody.innerHTML = `
       <div class="flashcard" onclick="ui.flipFlashcard()">
         <div class="flashcard-inner">
@@ -564,11 +177,7 @@ class LanguageGameUI {
         </div>
       ` : ''}
     `;
-
-    // Add click handlers to clickable words
     this.addWordClickHandlers();
-
-    // Auto-play TTS for the Spanish phrase (if enabled)
     if (game.getSetting('ttsAutoPlay')) {
       setTimeout(() => {
         this.speakCard(card.front);
@@ -576,97 +185,6 @@ class LanguageGameUI {
     }
   }
 
-  /**
-   * Speak the card text
-   * @param {string} text - Text to speak
-   * @param {string} lang - Language code (default: 'es')
-   */
-  speakCard(text, lang = 'es') {
-    speakSpanish(text, lang);
-  }
-
-  /**
-   * Flip the current flashcard
-   */
-  flipFlashcard() {
-    const flashcard = this.elements.panelBody.querySelector('.flashcard');
-    if (flashcard) {
-      flashcard.classList.toggle('flipped');
-
-      // Auto-play TTS based on settings
-      setTimeout(() => {
-        const card = this.currentCards[this.currentCardIndex];
-        if (flashcard.classList.contains('flipped')) {
-          // Speak the English translation when flipped (if enabled)
-          if (game.getSetting('ttsAutoPlayEnglish')) {
-            this.speakCard(card.back, 'en');
-          }
-        } else {
-          // Speak the Spanish phrase when flipped back (if enabled)
-          if (game.getSetting('ttsAutoPlay')) {
-            this.speakCard(card.front, 'es');
-          }
-        }
-      }, game.getSetting('flashcardFlipSpeed') * 1000);
-    }
-  }
-
-  /**
-   * Toggle flashcard details visibility
-   */
-  toggleFlashcardDetails() {
-    const detailsCard = document.getElementById('detailsCard');
-    if (detailsCard) {
-      const isVisible = detailsCard.style.display !== 'none';
-      detailsCard.style.display = isVisible ? 'none' : 'block';
-
-      // Update button text
-      const detailsBtn = this.elements.panelBody.querySelector('.flashcard-btn[onclick*="toggleFlashcardDetails"]');
-      if (detailsBtn) {
-        detailsBtn.innerHTML = isVisible ? '📖 Detalles' : '📖 Ocultar';
-      }
-    }
-  }
-
-  /**
-   * Go to previous flashcard
-   */
-  previousFlashcard() {
-    if (this.currentCardIndex > 0) {
-      this.currentCardIndex--;
-      this.renderCurrentFlashcard();
-    }
-  }
-
-  /**
-   * Go to next flashcard
-   */
-  nextFlashcard() {
-    if (this.currentCardIndex < this.currentCards.length - 1) {
-      this.currentCardIndex++;
-      this.renderCurrentFlashcard();
-    }
-  }
-
-  /**
-   * Mark current flashcard as learned
-   */
-  markAsLearned() {
-    const card = this.currentCards[this.currentCardIndex];
-    const wasNewlyLearned = game.addLearned(card.front, card.back, game.currentRegionKey, 10);
-
-    if (wasNewlyLearned) {
-      this.updateXPDisplay();
-      this.renderProgress();
-      this.renderMap(); // Update map progress
-    }
-
-    this.nextFlashcard();
-  }
-
-  /**
-   * Render quiz mode
-   */
   renderQuiz() {
     const card = game.getNextQuizCard();
     if (!card) {
@@ -681,10 +199,8 @@ class LanguageGameUI {
       `;
       return;
     }
-
-    this.currentCard = card; // Store current card for word lookups
+    this.currentCard = card;
     const options = game.getQuizOptions(card);
-
     this.elements.panelBody.innerHTML = `
       <div class="quiz-question">
         <h4>¿Cómo se dice "${card.back}" en español?</h4>
@@ -697,54 +213,9 @@ class LanguageGameUI {
         `).join('')}
       </div>
     `;
-
-    // Add click handlers for quiz options (not for words)
     this.addQuizOptionHandlers();
   }
 
-  /**
-   * Check quiz answer
-   * @param {string} userAnswer - User's answer
-   * @param {string} correctAnswer - Correct answer
-   */
-  checkQuizAnswer(userAnswer, correctAnswer) {
-    const isCorrect = userAnswer === correctAnswer;
-    const card = { front: correctAnswer, back: '' };
-
-    // Add feedback
-    const feedback = document.createElement('div');
-    feedback.className = `quiz-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
-    feedback.textContent = isCorrect ? '¡Correcto!' : `Incorrecto. La respuesta correcta es: ${correctAnswer}`;
-
-    const quizOptions = this.elements.panelBody.querySelector('.quiz-options');
-    quizOptions.appendChild(feedback);
-
-    // Mark as learned if correct
-    if (isCorrect) {
-      game.addLearned(card.front, card.back, game.currentRegionKey, 15);
-      this.updateXPDisplay();
-      this.renderProgress();
-      this.renderMap(); // Update map progress
-    }
-
-    // Disable all options
-    const options = this.elements.panelBody.querySelectorAll('.quiz-option');
-    options.forEach(option => {
-      option.style.pointerEvents = 'none';
-      if (option.textContent.trim() === userAnswer) {
-        option.classList.add(isCorrect ? 'correct' : 'incorrect');
-      }
-    });
-
-    // Continue after delay
-    setTimeout(() => {
-      this.renderQuiz();
-    }, 2000);
-  }
-
-  /**
-   * Render call & response mode
-   */
   renderCallResponse() {
     const card = game.getNextCRCard();
     if (!card) {
@@ -759,9 +230,7 @@ class LanguageGameUI {
       `;
       return;
     }
-
-    this.currentCard = card; // Store current card for word lookups
-
+    this.currentCard = card;
     this.elements.panelBody.innerHTML = `
       <div class="cr-prompt">
         <button class="tts-btn" onclick="speakSpanish('${card.back}')">🔊</button>
@@ -774,158 +243,9 @@ class LanguageGameUI {
       </button>
       <div id="crFeedback" style="margin-top: 0.6rem; text-align: center;"></div>
     `;
-
-    // Add click handlers to clickable words
     this.addWordClickHandlers();
   }
 
-  /**
-   * Clear call & response answer to allow retry
-   */
-  clearCRAnswer() {
-    const input = this.elements.panelBody.querySelector('.cr-input');
-    const submitBtn = this.elements.panelBody.querySelector('.cr-submit');
-    const feedback = document.getElementById('crFeedback');
-
-    // Clear and re-enable input
-    input.value = '';
-    input.disabled = false;
-    input.style.borderColor = '';
-    input.focus();
-
-    // Re-enable submit button
-    submitBtn.disabled = false;
-
-    // Clear feedback
-    feedback.innerHTML = '';
-  }
-
-  /**
-   * Check call & response answer with enhanced feedback
-   * @param {string} userAnswer - User's answer
-   * @param {string} correctAnswer - Correct answer
-   */
-  checkCRAnswer(userAnswer, correctAnswer) {
-    const validation = game.checkCRAnswer(userAnswer, { front: correctAnswer });
-    const feedback = document.getElementById('crFeedback');
-    const input = this.elements.panelBody.querySelector('.cr-input');
-
-    if (validation.isCorrect) {
-      input.style.borderColor = 'var(--clr-success)';
-
-      // Show correct answer if confidence is less than 99% (not perfect)
-      const showCorrectAnswer = validation.confidence < 0.99;
-
-      feedback.innerHTML = `
-        <div class="cr-feedback correct">
-          <strong>¡Correcto!</strong>
-          ${showCorrectAnswer ? `
-            <div class="correct-answer">
-              Respuesta ideal: <strong>${correctAnswer}</strong>
-            </div>
-          ` : ''}
-          <div class="feedback-details">
-            ${validation.type === 'exact' ? 'Respuesta perfecta' :
-          validation.type === 'partial' ? 'Respuesta parcial aceptada' :
-            validation.type === 'fuzzy' ? `Respuesta aceptada (similitud: ${Math.round(validation.confidence * 100)}%)` :
-              'Respuesta aceptada'}
-          </div>
-          ${showCorrectAnswer ? `
-            <div class="feedback-details">
-              Tu respuesta: "${userAnswer}"
-            </div>
-          ` : ''}
-        </div>
-      `;
-      feedback.style.color = 'var(--clr-success)';
-
-      const card = { front: correctAnswer, back: '' };
-      game.addLearned(card.front, card.back, game.currentRegionKey, 15);
-      this.updateXPDisplay();
-      this.renderProgress();
-      this.renderMap(); // Update map progress
-
-      // Auto-advance to next question after correct answer
-      setTimeout(() => {
-        this.renderCallResponse();
-      }, 2000);
-    } else {
-      input.style.borderColor = 'var(--clr-error)';
-      feedback.innerHTML = `
-        <div class="cr-feedback incorrect">
-          <strong>Incorrecto</strong>
-          <div class="correct-answer">
-            Respuesta correcta: <strong>${correctAnswer}</strong>
-          </div>
-          <div class="feedback-details">
-            Tu respuesta: "${userAnswer}"
-            <br>
-            Similitud: ${Math.round(validation.confidence * 100)}%
-          </div>
-          <div class="cr-controls">
-            <button class="cr-try-again" onclick="ui.clearCRAnswer()">
-              Intentar de nuevo
-            </button>
-            <button class="cr-continue" onclick="ui.renderCallResponse()">
-              Continuar →
-            </button>
-          </div>
-        </div>
-      `;
-      feedback.style.color = 'var(--clr-error)';
-
-      // Disable the submit button and input after wrong answer
-      const submitBtn = this.elements.panelBody.querySelector('.cr-submit');
-      input.disabled = true;
-      submitBtn.disabled = true;
-    }
-  }
-
-  /**
-   * Render progress bars
-   */
-  renderProgress() {
-    this.elements.progressContainer.innerHTML = '';
-
-    const regionsWithProgress = game.getAllRegionsWithProgress();
-
-    Object.entries(regionsWithProgress).forEach(([regionKey, regionData]) => {
-      const progress = regionData.progress;
-      const percentage = Math.round(progress.percentage);
-
-      const progressItem = document.createElement('div');
-      progressItem.className = 'progress-item';
-      progressItem.innerHTML = `
-        <div class="progress-header">
-          <span class="progress-title">${regionData.name}</span>
-          <span class="progress-percentage">${progress.learned}/${progress.total}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: ${percentage}%"></div>
-        </div>
-      `;
-
-      this.elements.progressContainer.appendChild(progressItem);
-    });
-  }
-
-  /**
-   * Initialize the UI
-   */
-  initialize() {
-    this.updateXPDisplay();
-    this.renderMap();
-    this.renderProgress();
-    this.renderPlaceholder();
-
-    // Restore last active tab
-    const lastTab = localStorage.getItem('currentTab') || 'map';
-    this.switchTab(lastTab);
-  }
-
-  /**
-   * Show settings modal
-   */
   showSettings() {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -958,10 +278,6 @@ class LanguageGameUI {
               <label>Velocidad: <input type="range" id="ttsRate" min="0.5" max="2" step="0.1" value="${game.getSetting('ttsRate')}"></label>
               <span id="ttsRateValue">${game.getSetting('ttsRate')}x</span>
             </div>
-            <div class="setting-item">
-              <label>Tiempo de espera: <input type="range" id="ttsCooldown" min="1000" max="10000" step="500" value="${game.getSetting('ttsCooldown')}"></label>
-              <span id="ttsCooldownValue">${game.getSetting('ttsCooldown') / 1000}s</span>
-            </div>
           </div>
           
           <div class="settings-section">
@@ -992,59 +308,6 @@ class LanguageGameUI {
                 Mostrar XP
               </label>
             </div>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="showCorrectAnswers" ${game.getSetting('showCorrectAnswers') ? 'checked' : ''}>
-                Mostrar respuestas correctas
-              </label>
-            </div>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="flexibleAnswerValidation" ${game.getSetting('flexibleAnswerValidation') ? 'checked' : ''}>
-                Validación flexible de respuestas
-              </label>
-            </div>
-          </div>
-          
-          <div class="settings-section">
-            <h3>🎨 Interfaz</h3>
-            <div class="setting-item">
-              <label>Modo oscuro:
-                <select id="darkMode">
-                  <option value="auto" ${game.getSetting('darkMode') === 'auto' ? 'selected' : ''}>Automático</option>
-                  <option value="light" ${game.getSetting('darkMode') === 'light' ? 'selected' : ''}>Claro</option>
-                  <option value="dark" ${game.getSetting('darkMode') === 'dark' ? 'selected' : ''}>Oscuro</option>
-                </select>
-              </label>
-            </div>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="compactMode" ${game.getSetting('compactMode') ? 'checked' : ''}>
-                Modo compacto
-              </label>
-            </div>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="largeText" ${game.getSetting('largeText') ? 'checked' : ''}>
-                Texto grande
-              </label>
-            </div>
-          </div>
-          
-          <div class="settings-section">
-            <h3>♿ Accesibilidad</h3>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="highContrast" ${game.getSetting('highContrast') ? 'checked' : ''}>
-                Alto contraste
-              </label>
-            </div>
-            <div class="setting-item">
-              <label>
-                <input type="checkbox" id="reduceMotion" ${game.getSetting('reduceMotion') ? 'checked' : ''}>
-                Reducir movimiento
-              </label>
-            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -1054,13 +317,504 @@ class LanguageGameUI {
       </div>
     `;
 
-    // Add event listeners for range inputs
+    document.body.appendChild(modal);
     this.setupSettingsListeners();
   }
 
-  /**
-   * Setup settings modal event listeners
-   */
+  saveSettings() {
+    const settings = {};
+    settings.ttsAutoPlay = document.getElementById('ttsAutoPlay').checked;
+    settings.ttsAutoPlayEnglish = document.getElementById('ttsAutoPlayEnglish').checked;
+    settings.ttsVolume = parseFloat(document.getElementById('ttsVolume').value);
+    settings.ttsRate = parseFloat(document.getElementById('ttsRate').value);
+    settings.animationsEnabled = document.getElementById('animationsEnabled').checked;
+    settings.flashcardFlipSpeed = parseFloat(document.getElementById('flashcardFlipSpeed').value);
+    settings.showProgressBars = document.getElementById('showProgressBars').checked;
+    settings.showXP = document.getElementById('showXP').checked;
+
+    Object.entries(settings).forEach(([key, value]) => {
+      game.updateSetting(key, value);
+    });
+
+    this.applySettings();
+    this.closeSettings();
+  }
+
+  resetSettings() {
+    game.resetSettings();
+    this.applySettings();
+    this.closeSettings();
+  }
+
+  closeSettings() {
+    const modal = document.querySelector('.modal-overlay');
+    if (modal) {
+      modal.remove();
+    }
+  }
+
+  // Missing methods that are called by components and main.js
+  updateXPDisplay() {
+    const levelInfo = game.getLevelInfo(); // Get the level info object
+    if (this.elements.xpCounter) {
+      // game.xp is correct, but we can use the formatted value from levelInfo
+      this.elements.xpCounter.textContent = `${formatXP(levelInfo.xp)} XP`;
+    }
+    if (this.elements.levelLabel) {
+      // Use levelInfo.level for the current level
+      this.elements.levelLabel.textContent = `Lvl ${levelInfo.level}`;
+    }
+    if (this.elements.xpBar) {
+      // Use the pre-calculated levelProgress percentage
+      this.elements.xpBar.value = levelInfo.levelProgress;
+      this.elements.xpBar.max = 100;
+    }
+  }
+
+  speakCard(text, lang = 'es') {
+    if (window.speakSpanish) {
+      window.speakSpanish(text, lang);
+    }
+  }
+
+  applySettings() {
+    // Apply theme and other UI settings
+    if (window.applyTheme) {
+      window.applyTheme();
+    }
+    // Update UI based on settings
+    this.updateXPDisplay();
+  }
+
+  getCurrentTab() {
+    return this.currentTab;
+  }
+
+  switchMode(mode) {
+    if (window.game) {
+      game.setCurrentMode(mode);
+      this.renderCurrentMode();
+    }
+  }
+
+  // Flashcard methods
+  flipFlashcard() {
+    const flashcard = this.elements.panelBody.querySelector('.flashcard');
+    if (flashcard) {
+      flashcard.classList.toggle('flipped');
+      setTimeout(() => {
+        const card = this.currentCards[this.currentCardIndex];
+        if (flashcard.classList.contains('flipped')) {
+          if (game.getSetting('ttsAutoPlayEnglish')) {
+            this.speakCard(card.back, 'en');
+          }
+        } else {
+          if (game.getSetting('ttsAutoPlay')) {
+            this.speakCard(card.front, 'es');
+          }
+        }
+      }, game.getSetting('flashcardFlipSpeed') * 1000);
+    }
+  }
+
+  previousFlashcard() {
+    if (this.currentCardIndex > 0) {
+      this.currentCardIndex--;
+      this.renderCurrentFlashcard();
+    }
+  }
+
+  nextFlashcard() {
+    if (this.currentCardIndex < this.currentCards.length - 1) {
+      this.currentCardIndex++;
+      this.renderCurrentFlashcard();
+    }
+  }
+
+  markAsLearned() {
+    const card = this.currentCards[this.currentCardIndex];
+    const wasNewlyLearned = game.addLearned(card.front, card.back, game.currentRegionKey, 10);
+    if (wasNewlyLearned) {
+      this.updateXPDisplay();
+      this.renderProgress();
+      this.renderMap();
+    }
+    this.nextFlashcard();
+  }
+
+  toggleFlashcardDetails() {
+    const detailsCard = document.getElementById('detailsCard');
+    if (detailsCard) {
+      const isVisible = detailsCard.style.display !== 'none';
+      detailsCard.style.display = isVisible ? 'none' : 'block';
+      const detailsBtn = this.elements.panelBody.querySelector('.flashcard-btn[onclick*="toggleFlashcardDetails"]');
+      if (detailsBtn) {
+        detailsBtn.innerHTML = isVisible ? '📖 Detalles' : '📖 Ocultar';
+      }
+    }
+  }
+
+  hidePopup() {
+    if (this.popup) {
+      this.popup.remove();
+      this.popup = null;
+    }
+  }
+
+  // Map rendering
+  renderMap() {
+    this.elements.mapContainer.innerHTML = '';
+    const regionsWithProgress = game.getAllRegionsWithProgress();
+    // Group regions by category
+    const groupedRegions = {};
+    Object.entries(regionsWithProgress).forEach(([regionKey, regionData]) => {
+      const category = regionData.category || 'Otros';
+      if (!groupedRegions[category]) groupedRegions[category] = [];
+      groupedRegions[category].push({ key: regionKey, data: regionData });
+    });
+    // Define category order and emojis
+    const categoryOrder = ['Fundamentos', 'Situaciones', 'Conversación', 'Gramática'];
+    const categoryEmojis = {
+      'Fundamentos': '🌟',
+      'Situaciones': '🎯',
+      'Conversación': '💬',
+      'Gramática': '📚'
+    };
+    // Render each category
+    categoryOrder.forEach(category => {
+      if (!groupedRegions[category]) return;
+      const categorySection = document.createElement('div');
+      categorySection.className = 'category-section';
+      const categoryHeader = document.createElement('div');
+      categoryHeader.className = 'category-header';
+      categoryHeader.innerHTML = `<h3>${categoryEmojis[category]} ${category}</h3>`;
+      const categoryGrid = document.createElement('div');
+      categoryGrid.className = 'category-grid';
+      groupedRegions[category].forEach(({ key: regionKey, data: regionData }) => {
+        const regionCard = document.createElement('div');
+        regionCard.className = 'region-card';
+        regionCard.style.backgroundColor = regionData.color;
+        regionCard.setAttribute('data-region', regionKey);
+        const progress = regionData.progress;
+        const percentage = Math.round(progress.percentage);
+        regionCard.innerHTML = `
+          <div class="region-content">
+            <div class="region-emoji">${regionData.emoji}</div>
+            <div class="region-info">
+              <h4>${regionData.name}</h4>
+              <div class="progress-info">
+                ${progress.learned}/${progress.total} (${percentage}%)
+              </div>
+            </div>
+          </div>
+          <div class="region-progress-bar">
+            <div class="region-progress-fill" style="width: ${percentage}%"></div>
+          </div>
+        `;
+        regionCard.addEventListener('click', () => this.selectRegion(regionKey));
+        categoryGrid.appendChild(regionCard);
+      });
+      categorySection.appendChild(categoryHeader);
+      categorySection.appendChild(categoryGrid);
+      this.elements.mapContainer.appendChild(categorySection);
+    });
+  }
+
+  selectRegion(regionKey) {
+    game.setCurrentRegion(regionKey);
+    // Update map selection
+    const regionCards = this.elements.mapContainer.querySelectorAll('.region-card');
+    regionCards.forEach(card => card.classList.remove('selected'));
+    const selectedCard = this.elements.mapContainer.querySelector(`[data-region="${regionKey}"]`);
+    if (selectedCard) selectedCard.classList.add('selected');
+    // Update panel title
+    const region = REGIONS[regionKey];
+    this.elements.panelTitle.textContent = region.name;
+    // Switch to game tab and render current mode
+    this.switchTab('game');
+    this.renderCurrentMode();
+  }
+
+  renderPlaceholder() {
+    if (this.elements.panelBody) {
+      this.elements.panelBody.innerHTML = '<p class="placeholder-text">Elige una región del mapa para comenzar a aprender español.</p>';
+    }
+  }
+
+  initialize() {
+    // Initialize the UI - called by some test files
+    this.updateXPDisplay();
+    this.renderMap();
+
+    // Set initial tab
+    const savedTab = localStorage.getItem('currentTab') || 'map';
+    this.switchTab(savedTab);
+  }
+
+  // Utility methods
+  makeWordsClickable(text, breakdown = {}) {
+    if (!breakdown || Object.keys(breakdown).length === 0) return text;
+    let processedText = text;
+    const replacements = new Map();
+    let placeholderIndex = 0;
+    
+    // Handle multi-word phrases first
+    const sortedKeys = Object.keys(breakdown).sort((a, b) => b.length - a.length);
+    sortedKeys.forEach(phrase => {
+      if (!phrase.includes(' ')) return;
+      const explanation = breakdown[phrase];
+      const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const prefix = /^\w/.test(phrase) ? '\\b' : '';
+      const suffix = /\w$/.test(phrase) ? '\\b' : '';
+      const regex = new RegExp(`${prefix}${escapedPhrase}${suffix}`, 'gi');
+      processedText = processedText.replace(regex, (match) => {
+        const placeholder = `__PLACEHOLDER_${placeholderIndex++}__`;
+        const replacementHtml = `<span class="clickable-word multi-word-phrase" data-word="${match}" data-explanation="${explanation}">${match}</span>`;
+        replacements.set(placeholder, replacementHtml);
+        return placeholder;
+      });
+    });
+    
+    // Handle single words
+    const tokens = processedText.split(/(\s+)/);
+    const newTokens = tokens.map(token => {
+      if (/^\s+$/.test(token) || token.startsWith('__PLACEHOLDER_')) return token;
+      const cleanToken = token.replace(/[.,!?;:¿¡]+$/, '');
+      const punctuation = token.substring(cleanToken.length);
+      const explanation = breakdown[token] || breakdown[cleanToken];
+      if (explanation) {
+        const wordToWrap = breakdown[token] ? token : cleanToken;
+        const remainingPunctuation = breakdown[token] ? '' : punctuation;
+        const placeholder = `__PLACEHOLDER_${placeholderIndex++}__`;
+        const replacementHtml = `<span class="clickable-word" data-word="${wordToWrap}" data-explanation="${explanation}">${wordToWrap}</span>${remainingPunctuation}`;
+        replacements.set(placeholder, replacementHtml);
+        return placeholder;
+      }
+      return token;
+    });
+    processedText = newTokens.join('');
+    
+    // Replace placeholders with HTML
+    replacements.forEach((html, placeholder) => {
+      processedText = processedText.replace(placeholder, html);
+    });
+    return processedText;
+  }
+
+  addWordClickHandlers() {
+    const clickableWords = document.querySelectorAll('.clickable-word');
+    clickableWords.forEach(word => {
+      word.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wordText = word.dataset.word;
+        const explanation = word.dataset.explanation;
+        const isFront = e.target.closest('.flashcard-front');
+        const lang = isFront ? 'es' : 'en';
+        if (window.speakSpanish) {
+          window.speakSpanish(wordText, lang);
+        }
+        this.showPopup(wordText, explanation, e);
+      });
+    });
+  }
+
+  addQuizOptionHandlers() {
+    const quizOptions = document.querySelectorAll('.quiz-option');
+    quizOptions.forEach(option => {
+      option.addEventListener('click', (e) => {
+        const userAnswer = option.dataset.answer;
+        const correctAnswer = option.dataset.correct;
+        this.checkQuizAnswer(userAnswer, correctAnswer);
+      });
+    });
+  }
+
+  checkQuizAnswer(userAnswer, correctAnswer) {
+    const isCorrect = userAnswer === correctAnswer;
+    const card = { front: correctAnswer, back: '' };
+    const feedback = document.createElement('div');
+    feedback.className = `quiz-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+    feedback.textContent = isCorrect ? '¡Correcto!' : `Incorrecto. La respuesta correcta es: ${correctAnswer}`;
+    const quizOptions = this.elements.panelBody.querySelector('.quiz-options');
+    quizOptions.appendChild(feedback);
+    if (isCorrect) {
+      game.addLearned(card.front, card.back, game.currentRegionKey, 15);
+      this.updateXPDisplay();
+      this.renderProgress();
+      this.renderMap();
+    }
+    const options = this.elements.panelBody.querySelectorAll('.quiz-option');
+    options.forEach(option => {
+      option.style.pointerEvents = 'none';
+      if (option.textContent.trim() === userAnswer) {
+        option.classList.add(isCorrect ? 'correct' : 'incorrect');
+      }
+    });
+    setTimeout(() => {
+      this.renderQuiz();
+    }, 2000);
+  }
+
+  checkCRAnswer(userAnswer, correctAnswer) {
+    const validation = game.checkCRAnswer(userAnswer, { front: correctAnswer });
+    const feedback = document.getElementById('crFeedback');
+    const input = this.elements.panelBody.querySelector('.cr-input');
+    if (validation.isCorrect) {
+      input.style.borderColor = 'var(--clr-success)';
+      const showCorrectAnswer = validation.confidence < 0.99;
+      feedback.innerHTML = `
+        <div class="cr-feedback correct">
+          <strong>¡Correcto!</strong>
+          ${showCorrectAnswer ? `<div class="correct-answer">Respuesta ideal: <strong>${correctAnswer}</strong></div>` : ''}
+          <div class="feedback-details">
+            ${validation.type === 'exact' ? 'Respuesta perfecta' :
+          validation.type === 'partial' ? 'Respuesta parcial aceptada' :
+            validation.type === 'fuzzy' ? `Respuesta aceptada (similitud: ${Math.round(validation.confidence * 100)}%)` :
+              'Respuesta aceptada'}
+          </div>
+          ${showCorrectAnswer ? `<div class="feedback-details">Tu respuesta: "${userAnswer}"</div>` : ''}
+        </div>
+      `;
+      feedback.style.color = 'var(--clr-success)';
+      const card = { front: correctAnswer, back: '' };
+      game.addLearned(card.front, card.back, game.currentRegionKey, 15);
+      this.updateXPDisplay();
+      this.renderProgress();
+      this.renderMap();
+      setTimeout(() => {
+        this.renderCallResponse();
+      }, 2000);
+    } else {
+      input.style.borderColor = 'var(--clr-error)';
+      feedback.innerHTML = `
+        <div class="cr-feedback incorrect">
+          <strong>Incorrecto</strong>
+          <div class="correct-answer">Respuesta correcta: <strong>${correctAnswer}</strong></div>
+          <div class="feedback-details">Tu respuesta: "${userAnswer}"<br>Similitud: ${Math.round(validation.confidence * 100)}%</div>
+          <div class="cr-controls">
+            <button class="cr-try-again" onclick="ui.clearCRAnswer()">Intentar de nuevo</button>
+            <button class="cr-continue" onclick="ui.renderCallResponse()">Continuar →</button>
+          </div>
+        </div>
+      `;
+      feedback.style.color = 'var(--clr-error)';
+      const submitBtn = this.elements.panelBody.querySelector('.cr-submit');
+      input.disabled = true;
+      submitBtn.disabled = true;
+    }
+  }
+
+  clearCRAnswer() {
+    const input = this.elements.panelBody.querySelector('.cr-input');
+    const submitBtn = this.elements.panelBody.querySelector('.cr-submit');
+    const feedback = document.getElementById('crFeedback');
+    input.value = '';
+    input.disabled = false;
+    input.style.borderColor = '';
+    input.focus();
+    submitBtn.disabled = false;
+    feedback.innerHTML = '';
+  }
+
+  renderProgress() {
+    this.elements.progressContainer.innerHTML = '';
+    const regionsWithProgress = game.getAllRegionsWithProgress();
+    Object.entries(regionsWithProgress).forEach(([regionKey, regionData]) => {
+      const progress = regionData.progress;
+      const percentage = Math.round(progress.percentage);
+      const progressItem = document.createElement('div');
+      progressItem.className = 'progress-item';
+      progressItem.innerHTML = `
+        <div class="progress-header">
+          <span class="progress-title">${regionData.name}</span>
+          <span class="progress-percentage">${progress.learned}/${progress.total}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${percentage}%"></div>
+        </div>
+      `;
+      this.elements.progressContainer.appendChild(progressItem);
+    });
+  }
+
+  showFirstTimeFlashcardTip() {
+    const hasSeenTip = localStorage.getItem('flashcardTipSeen');
+    if (hasSeenTip) return;
+    const tipOverlay = document.createElement('div');
+    tipOverlay.className = 'modal-overlay';
+    tipOverlay.innerHTML = `
+      <div class="modal-content flashcard-tip-modal">
+        <div class="modal-header">
+          <h2>💡 Helpful Tip</h2>
+          <button class="modal-close" onclick="ui.hideFlashcardTip()">×</button>
+        </div>
+        <div class="modal-body">
+          <p>You can click on a word in a flashcard to see its meaning, clicking anywhere else within the flashcard flips it</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn primary" onclick="ui.hideFlashcardTip()">Got it!</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(tipOverlay);
+    this.flashcardTipOverlay = tipOverlay;
+    localStorage.setItem('flashcardTipSeen', 'true');
+  }
+
+  hideFlashcardTip() {
+    if (this.flashcardTipOverlay) {
+      this.flashcardTipOverlay.remove();
+      this.flashcardTipOverlay = null;
+    }
+  }
+
+  showPopup(word, explanation, event) {
+    this.hidePopup();
+    const popup = document.createElement('div');
+    popup.className = 'word-popup';
+    popup.innerHTML = `
+      <div class="popup-content">
+        <div class="popup-header">
+          <span class="popup-word">${word}</span>
+          <button class="popup-close" onclick="ui.hidePopup()">×</button>
+        </div>
+        <div class="popup-body">
+          <div class="popup-explanation">${explanation}</div>
+        </div>
+      </div>
+    `;
+    const rect = event.target.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    let top = rect.bottom + scrollTop + 5;
+    let left = rect.left + scrollLeft;
+    document.body.appendChild(popup);
+    const popupRect = popup.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    if (left + popupRect.width > viewportWidth + scrollLeft) {
+      left = viewportWidth + scrollLeft - popupRect.width - 10;
+    }
+    if (left < scrollLeft) {
+      left = scrollLeft + 10;
+    }
+    if (top + popupRect.height > viewportHeight + scrollTop) {
+      top = rect.top + scrollTop - popupRect.height - 5;
+    }
+    if (top < scrollTop) {
+      top = scrollTop + 10;
+    }
+    popup.style.position = 'absolute';
+    popup.style.top = `${top}px`;
+    popup.style.left = `${left}px`;
+    popup.addEventListener('click', (e) => {
+      if (e.target.classList.contains('popup-close')) {
+        this.hidePopup();
+      }
+    });
+    this.popup = popup;
+  }
+
   setupSettingsListeners() {
     // Volume range
     const volumeInput = document.getElementById('ttsVolume');
@@ -1080,15 +834,6 @@ class LanguageGameUI {
       });
     }
 
-    // Cooldown range
-    const cooldownInput = document.getElementById('ttsCooldown');
-    const cooldownValue = document.getElementById('ttsCooldownValue');
-    if (cooldownInput) {
-      cooldownInput.addEventListener('input', (e) => {
-        cooldownValue.textContent = (e.target.value / 1000) + 's';
-      });
-    }
-
     // Flip speed range
     const flipSpeedInput = document.getElementById('flashcardFlipSpeed');
     const flipSpeedValue = document.getElementById('flashcardFlipSpeedValue');
@@ -1098,106 +843,14 @@ class LanguageGameUI {
       });
     }
   }
-
-  /**
-   * Save settings from modal
-   */
-  saveSettings() {
-    const settings = {};
-
-    // TTS Settings
-    settings.ttsAutoPlay = document.getElementById('ttsAutoPlay').checked;
-    settings.ttsAutoPlayEnglish = document.getElementById('ttsAutoPlayEnglish').checked;
-    settings.ttsVolume = parseFloat(document.getElementById('ttsVolume').value);
-    settings.ttsRate = parseFloat(document.getElementById('ttsRate').value);
-    settings.ttsCooldown = parseInt(document.getElementById('ttsCooldown').value);
-
-    // Animation Settings
-    settings.animationsEnabled = document.getElementById('animationsEnabled').checked;
-    settings.flashcardFlipSpeed = parseFloat(document.getElementById('flashcardFlipSpeed').value);
-
-    // Game Settings
-    settings.showProgressBars = document.getElementById('showProgressBars').checked;
-    settings.showXP = document.getElementById('showXP').checked;
-    settings.showCorrectAnswers = document.getElementById('showCorrectAnswers').checked;
-    settings.flexibleAnswerValidation = document.getElementById('flexibleAnswerValidation').checked;
-
-    // UI Settings
-    settings.darkMode = document.getElementById('darkMode').value;
-    settings.compactMode = document.getElementById('compactMode').checked;
-    settings.largeText = document.getElementById('largeText').checked;
-
-    // Accessibility
-    settings.highContrast = document.getElementById('highContrast').checked;
-    settings.reduceMotion = document.getElementById('reduceMotion').checked;
-
-    // Update game settings
-    Object.entries(settings).forEach(([key, value]) => {
-      game.updateSetting(key, value);
-    });
-
-    // Apply settings immediately
-    this.applySettings();
-
-    this.closeSettings();
-  }
-
-  /**
-   * Reset settings to defaults
-   */
-  resetSettings() {
-    game.resetSettings();
-    this.applySettings();
-    this.closeSettings();
-  }
-
-  /**
-   * Close settings modal
-   */
-  closeSettings() {
-    const modal = document.querySelector('.modal-overlay');
-    if (modal) {
-      modal.remove();
-    }
-  }
-
-  /**
-   * Apply current settings to the UI
-   */
-  applySettings() {
-    // Apply dark mode
-    const darkMode = game.getSetting('darkMode');
-    if (darkMode === 'auto') {
-      setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    } else {
-      setTheme(darkMode);
-    }
-
-    // Apply animations
-    const animationsEnabled = game.getSetting('animationsEnabled');
-    document.body.style.setProperty('--transition-speed', animationsEnabled ? game.getSetting('transitionSpeed') + 's' : '0s');
-
-    // Apply compact mode
-    const compactMode = game.getSetting('compactMode');
-    document.body.classList.toggle('compact-mode', compactMode);
-
-    // Apply large text
-    const largeText = game.getSetting('largeText');
-    document.body.classList.toggle('large-text', largeText);
-
-    // Apply high contrast
-    const highContrast = game.getSetting('highContrast');
-    document.body.classList.toggle('high-contrast', highContrast);
-
-    // Apply reduce motion
-    const reduceMotion = game.getSetting('reduceMotion');
-    document.body.classList.toggle('reduce-motion', reduceMotion);
-
-    // Re-render UI elements that depend on settings
-    this.renderMap();
-    this.updateXPDisplay();
-  }
 }
 
-// Create global UI instance
 const ui = new LanguageGameUI();
+
+// We still need to expose `ui` globally for the inline `onclick` handlers in the HTML.
+window.ui = ui;
+
+// ===================== FIX =====================
+// Add this line to make the `ui` instance available for other modules to import.
+export default ui;
+// ===============================================

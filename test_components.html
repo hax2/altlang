@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Component Test - Language Map Quest</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <h1>🧪 Component Test</h1>
+      </div>
+      <div class="header-right">
+        <div class="xp-info">
+          <span id="xpCounter" class="xp-num">0 XP</span>
+          <span id="levelLabel" class="level">Lvl 1</span>
+          <progress id="xpBar" value="0" max="100"></progress>
+        </div>
+        <button id="settingsBtn" class="settings-btn">⚙️</button>
+      </div>
+    </header>
+
+    <nav class="tab-navigation">
+      <button class="tab-btn active" data-tab="map">🗺️ Map</button>
+      <button class="tab-btn" data-tab="game">🎮 Game</button>
+      <button class="tab-btn" data-tab="progress">📊 Progress</button>
+    </nav>
+
+    <main class="tab-content">
+      <section id="map-tab" class="tab-panel active">
+        <div id="mapContainer" class="map-container"></div>
+      </section>
+      
+      <section id="game-tab" class="tab-panel">
+        <div class="game-section">
+          <div class="panel-header">
+            <h3 id="panelTitle">Test Game</h3>
+            <div class="mode-buttons">
+              <button id="flashcardBtn" class="mode-btn active">📚 Flashcards</button>
+              <button id="quizBtn" class="mode-btn">❓ Quiz</button>
+              <button id="crBtn" class="mode-btn">💬 Call & Response</button>
+            </div>
+          </div>
+          <div id="panelBody" class="panel-body">
+            <p>Select a region to start</p>
+          </div>
+        </div>
+      </section>
+      
+      <section id="progress-tab" class="tab-panel">
+        <div id="progressContainer" class="progress-container"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/game.js"></script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module">
+    // Test the components
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🧪 Testing component structure...');
+      
+      // Wait a bit for UI to be fully loaded
+      setTimeout(() => {
+        // Test if UI is properly initialized
+        if (window.ui) {
+          console.log('✅ UI initialized successfully');
+          console.log('✅ UI methods available:', {
+            renderMap: typeof window.ui.renderMap === 'function',
+            renderFlashcards: typeof window.ui.renderFlashcards === 'function',
+            renderQuiz: typeof window.ui.renderQuiz === 'function',
+            renderCallResponse: typeof window.ui.renderCallResponse === 'function',
+            showSettings: typeof window.ui.showSettings === 'function',
+            renderProgress: typeof window.ui.renderProgress === 'function'
+          });
+          
+          // Test basic functionality
+          try {
+            window.ui.updateXPDisplay();
+            console.log('✅ updateXPDisplay works');
+          } catch (e) {
+            console.error('❌ updateXPDisplay failed:', e);
+          }
+          
+          try {
+            window.ui.initialize();
+            console.log('✅ initialize works');
+          } catch (e) {
+            console.error('❌ initialize failed:', e);
+          }
+          
+          try {
+            window.ui.switchTab('progress');
+            console.log('✅ Tab switching works');
+          } catch (e) {
+            console.error('❌ Tab switching failed:', e);
+          }
+          
+          try {
+            window.ui.switchTab('map');
+            console.log('✅ Map tab works');
+          } catch (e) {
+            console.error('❌ Map tab failed:', e);
+          }
+          
+        } else {
+          console.error('❌ UI not initialized');
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>

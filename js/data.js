@@ -48,7 +48,7 @@ const REGIONS = {
         back: "I'm very sorry.",
         context: 'Use to apologize sincerely for a mistake or a sad event.',
         grammar: 'Lo siento = I feel it (common way to say sorry)',
-        breakdown: { 'Lo': 'it', 'siento': 'I feel', 'mucho': 'very/a lot' }
+        breakdown: { 'Lo': 'it', 'siento': 'I feel', 'mucho': 'very lot' }
       },
       {
         front: 'No entiendo.',
@@ -218,11 +218,11 @@ const REGIONS = {
         breakdown: { '¿Qué': 'What', 'me': 'to me', 'recomienda?': 'do you recommend?' }
       },
       {
-        front: 'Soy alérgico/a a los frutos secos.',
+        front: 'Soy alérgico a los frutos secos.',
         back: 'I am allergic to nuts.',
         context: 'Crucial phrase to communicate a food allergy. Use "alérgico" for male, "alérgica" for female.',
-        grammar: 'Soy = I am (ser verb), alérgico/a = allergic',
-        breakdown: { 'Soy': 'I am', 'alérgico/a': 'allergic', 'a': 'to', 'los': 'the', 'frutos secos': 'nuts' }
+        grammar: 'Soy = I am (ser verb), alérgico = allergic',
+        breakdown: { 'Soy': 'I am', 'alérgico': 'allergic', 'a': 'to', 'los': 'the', 'frutos secos': 'nuts' }
       },
       {
         front: 'Voy a llegar más tarde de lo normal.',
@@ -313,11 +313,11 @@ const REGIONS = {
     description: 'Navigating and asking for directions - Use these phrases when you are lost or trying to find a specific location.',
     flashcards: [
       {
-        front: 'Estoy perdido/a. ¿Me puede ayudar?',
+        front: 'Estoy perdido. ¿Me puede ayudar?',
         back: "I'm lost. Can you help me?",
         context: 'The essential first phrase when you need help with directions. Use "perdido" for male, "perdida" for female.',
-        grammar: 'Estoy = I am (location/state), perdido/a = lost',
-        breakdown: { 'Estoy': 'I am', 'perdido/a': 'lost', '¿Me puede': 'Can you', 'ayudar?': 'help me?' }
+        grammar: 'Estoy = I am (location/state), perdido = lost',
+        breakdown: { 'Estoy': 'I am', 'perdido': 'lost', '¿Me puede': 'Can you', 'ayudar?': 'help me?' }
       },
       {
         front: 'Siga todo recto por dos cuadras.',
@@ -338,7 +338,7 @@ const REGIONS = {
         back: 'How do I get to the museum?',
         context: 'A direct question to ask for directions to a place.',
         grammar: '¿Cómo llego? = How do I arrive? (llegar verb)',
-        breakdown: { '¿Cómo': 'How', 'llego': 'do I get/arrive', 'al': 'to the', 'museo?': 'museum?' }
+        breakdown: { '¿Cómo': 'How', 'llego': 'do I getrrive', 'al': 'to the', 'museo?': 'museum?' }
       },
       {
         front: 'Está a la vuelta de la esquina.',
@@ -388,7 +388,7 @@ const REGIONS = {
         front: 'Hay nubes pero no llueve.',
         back: "It's cloudy but it's not raining.",
         context: 'Describing an overcast day without rain.',
-        grammar: 'Hay = There is/are, no llueve = it does not rain',
+        grammar: 'Hay = There isre, no llueve = it does not rain',
         breakdown: { 'Hay': 'There are', 'nubes': 'clouds', 'pero': 'but', 'no': 'not', 'llueve': 'it rains' }
       }
     ]
@@ -429,11 +429,11 @@ const REGIONS = {
         breakdown: { '¿Dónde está': 'Where is', 'la': 'the', 'farmacia': 'pharmacy', 'más': 'most', 'cercana?': 'near?' }
       },
       {
-        front: 'Me siento mareado/a.',
+        front: 'Me siento mareado.',
         back: 'I feel dizzy.',
         context: 'Describing a feeling of dizziness or lightheadedness. Use "mareado" for male, "mareada" for female.',
         grammar: 'Me siento = I feel (sentirse verb, reflexive)',
-        breakdown: { 'Me': 'myself', 'siento': 'I feel', 'mareado/a': 'dizzy' }
+        breakdown: { 'Me': 'myself', 'siento': 'I feel', 'mareado': 'dizzy' }
       }
     ]
   },

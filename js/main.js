@@ -1,14 +1,19 @@
 // Main Application Entry Point
+// ===================== FIX =====================
+// Import the `ui` object from ui.js
+import ui from './ui.js';
+// ===============================================
 
 /**
  * Initialize the application when DOM is loaded
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize UI
-  ui.initialize();
+  // UI is initialized by instantiating LanguageGameUI in ui.js
   
-  // Apply settings on startup
-  ui.applySettings();
+  // ===================== FIX =====================
+  // This line was missing. It's crucial for rendering the initial state.
+  ui.initialize();
+  // ===============================================
   
   // Initialize theme
   initializeTheme();

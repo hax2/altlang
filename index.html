@@ -36,6 +36,9 @@
       <button class="tab-btn" data-tab="game">
         🎮 Juego de Flashcards
       </button>
+      <button class="tab-btn" data-tab="play">
+        🎯 Jugar
+      </button>
       <button class="tab-btn" data-tab="progress">
         📊 Progreso
       </button>
@@ -77,6 +80,23 @@
         </div>
       </section>
 
+      <!-- Play Tab -->
+      <section id="play-tab" class="tab-panel">
+        <div class="play-section">
+          <div class="play-header">
+            <h3 id="playTitle">Modo Jugar</h3>
+            <div class="play-stats">
+              <span id="currentRegionName" class="current-region"></span>
+              <span id="playProgress" class="play-progress"></span>
+            </div>
+          </div>
+          
+          <div id="playBody" class="play-body">
+            <p class="placeholder-text">Comenzando el modo jugar...</p>
+          </div>
+        </div>
+      </section>
+
       <!-- Progress Tab -->
       <section id="progress-tab" class="tab-panel">
         <div class="progress-section">
@@ -93,7 +113,29 @@
   <script src="js/data.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/game.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/main.js"></script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module">
+    import ui from './js/ui.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize the UI with full components
+      ui.initialize();
+      
+      // Initialize theme
+      if (typeof initializeTheme !== 'undefined') {
+        initializeTheme();
+      }
+      
+      // Add settings button event listener
+      const settingsBtn = document.getElementById('settingsBtn');
+      if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+          ui.showSettings();
+        });
+      }
+      
+      console.log('🚀 Language Map Quest initialized with full components!');
+    });
+  </script>
 </body>
 </html> 

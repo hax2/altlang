@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Play Mode - Language Map Quest</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1>🗺️ Language Map Quest - Play Mode Test</h1>
+      </div>
+      <div class="header-right">
+        <div class="xp-info">
+          <span id="xpCounter" class="xp-num">0 XP</span>
+          <span id="levelLabel" class="level">Lvl 1</span>
+          <progress id="xpBar" value="0" max="100"></progress>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tab-navigation">
+      <button class="tab-btn" data-tab="map">
+        🗺️ Regiones de Español
+      </button>
+      <button class="tab-btn" data-tab="game">
+        🎮 Juego de Flashcards
+      </button>
+      <button class="tab-btn active" data-tab="play">
+        🎯 Jugar
+      </button>
+      <button class="tab-btn" data-tab="progress">
+        📊 Progreso
+      </button>
+    </nav>
+
+    <!-- Tab Content -->
+    <main class="tab-content">
+      <!-- Play Tab -->
+      <section id="play-tab" class="tab-panel active">
+        <div class="play-section">
+          <div class="play-header">
+            <h3 id="playTitle">Modo Jugar</h3>
+            <div class="play-stats">
+              <span id="currentRegionName" class="current-region">Básicos</span>
+              <span id="playProgress" class="play-progress">2/9 (22%)</span>
+            </div>
+          </div>
+          
+          <div id="playBody" class="play-body">
+            <div class="play-card-container">
+              <div class="play-mode-indicator">
+                <span class="mode-badge flashcard-mode">📚 Flashcard</span>
+              </div>
+              
+              <div class="flashcard play-flashcard">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">
+                    <button class="tts-btn">🔊</button>
+                    <div class="flip-indicator">🔄</div>
+                    <span class="clickable-word">Sí</span>, <span class="clickable-word">por favor</span>.
+                  </div>
+                  <div class="flashcard-back">
+                    <button class="tts-btn">🔊</button>
+                    <div class="flip-indicator">🔄</div>
+                    Yes, please.
+                  </div>
+                </div>
+              </div>
+              
+              <div class="play-controls">
+                <button class="play-btn incorrect">
+                  ❌ Difícil
+                </button>
+                <button class="play-btn correct">
+                  ✅ Fácil
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    // Test initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Play mode test loaded');
+      
+      // Initialize the UI to test play mode
+      ui.initialize();
+      
+      // Switch to play tab to test the functionality
+      setTimeout(() => {
+        ui.switchTab('play');
+        console.log('Switched to play mode');
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

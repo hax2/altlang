@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Current State Test</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="header-left">
+        <h1>🧪 Current State Test</h1>
+      </div>
+      <div class="header-right">
+        <div class="xp-info">
+          <span id="xpCounter" class="xp-num">0 XP</span>
+          <span id="levelLabel" class="level">Lvl 1</span>
+          <progress id="xpBar" value="0" max="100"></progress>
+        </div>
+        <button id="settingsBtn" class="settings-btn">⚙️</button>
+      </div>
+    </header>
+
+    <nav class="tab-navigation">
+      <button class="tab-btn active" data-tab="map">🗺️ Map</button>
+      <button class="tab-btn" data-tab="game">🎮 Game</button>
+      <button class="tab-btn" data-tab="progress">📊 Progress</button>
+    </nav>
+
+    <main class="tab-content">
+      <section id="map-tab" class="tab-panel active">
+        <div id="mapContainer" class="map-container">
+          <p>Map should load here...</p>
+        </div>
+      </section>
+      
+      <section id="game-tab" class="tab-panel">
+        <div class="game-section">
+          <div class="panel-header">
+            <h3 id="panelTitle">Select a region</h3>
+            <div class="mode-buttons">
+              <button id="flashcardBtn" class="mode-btn active">📚 Flashcards</button>
+              <button id="quizBtn" class="mode-btn">❓ Quiz</button>
+              <button id="crBtn" class="mode-btn">💬 Call & Response</button>
+            </div>
+          </div>
+          <div id="panelBody" class="panel-body">
+            <p>Game content should load here...</p>
+          </div>
+        </div>
+      </section>
+      
+      <section id="progress-tab" class="tab-panel">
+        <div id="progressContainer" class="progress-container">
+          <p>Progress should load here...</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Load scripts in the same order as index.html -->
+  <script src="js/data.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/game.js"></script>
+  <script type="module" src="js/ui.js"></script>
+  
+  <script type="module">
+    // Test script similar to main.js
+    import ui from './js/ui.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🧪 Testing current state...');
+      
+      try {
+        // Test basic objects
+        console.log('✅ UI imported:', !!ui);
+        console.log('✅ Game available:', typeof game !== 'undefined');
+        console.log('✅ REGIONS available:', typeof REGIONS !== 'undefined');
+        
+        // Test initialization
+        console.log('🔄 Initializing UI...');
+        ui.initialize();
+        console.log('✅ UI initialized');
+        
+        // Test theme initialization
+        if (typeof initializeTheme !== 'undefined') {
+          initializeTheme();
+          console.log('✅ Theme initialized');
+        } else {
+          console.log('⚠️ initializeTheme not available');
+        }
+        
+        // Test settings button
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (settingsBtn) {
+          settingsBtn.addEventListener('click', () => {
+            console.log('🔄 Opening settings...');
+            ui.showSettings();
+          });
+          console.log('✅ Settings button connected');
+        }
+        
+        console.log('🎉 All tests completed successfully!');
+        
+      } catch (error) {
+        console.error('❌ Test failed:', error);
+        console.error('Stack:', error.stack);
+        
+        // Show error on page
+        document.body.innerHTML += `
+          <div style="background: red; color: white; padding: 20px; margin: 20px;">
+            <h2>Error Detected:</h2>
+            <p><strong>Message:</strong> ${error.message}</p>
+            <p><strong>Stack:</strong> ${error.stack}</p>
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>
